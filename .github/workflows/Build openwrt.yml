@@ -10,7 +10,7 @@ jobs:
             - name: Setup Ubuntu
               run: |
                 sudo apt update
-                sudo apt install -y python3 python3-pip python3-ply python3-distutils python3-pyelftools libpython3-dev swig
+                sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev \libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
             - name: Checkout
               uses: actions/checkout@v3
 
@@ -18,34 +18,10 @@ jobs:
               run: |
                 ./scripts/feeds update -a
                 ./scripts/feeds install -a
-                cd feeds/luci
-                wget https://gist.githubusercontent.com/mj22226/3888ce030740e7cccbadce571e874913/raw/76e8c2917ddc90499f976f4a0ca2eed01a95efd3/5918.patch
-                wget https://gist.githubusercontent.com/mj22226/f6db007367a22a31f9cb1c109a032b45/raw/be368c4f1605f652a001d81548c3a3e14adf6cb7/luci-app-diskman.patch
-                git apply 5918.patch
-                git apply luci-app-diskman.patch
-                cd -
-                cd  feeds/packages
-                wget https://gist.githubusercontent.com/mj22226/351f11e66f08f06e37a985719a31ddb4/raw/b35ba7a3aac1949bd6bbeaad065a0a93dc3c34f0/01-cpu.patch
-                git apply  01-cpu.patch
-                cd -
-                sed -i "70s/'0'/'1'/" feeds/luci/applications/luci-app-statistics/root/etc/config/luci_statistics
-                sed -i "83s/'0'/'1'/" feeds/luci/applications/luci-app-statistics/root/etc/config/luci_statistics
-                sed -i "193s/'0'/'1'/" feeds/luci/applications/luci-app-statistics/root/etc/config/luci_statistics
-                sed -i "210s/'0'/'1'/" feeds/luci/applications/luci-app-statistics/root/etc/config/luci_statistics
-                sed -i "13s/'1'/'0'/" feeds/packages/utils/dockerd/files/etc/config/dockerd
-
-                ./scripts/feeds update -a
-                ./scripts/feeds install -a -f
-                cp .github/workflows/config.buildinfo .config
+                cp configs/orangepi-5-plus-rk3588_defconfig .config
                 make defconfig
-                wget https://gist.githubusercontent.com/mj22226/8fe3f95119c0ea42794f8241042b60d5/raw/1e0cb3155a8df2fd36a18629f08c51d3c90ecff9/0001-local-key.patch
-                git apply 0001-local-key.patch
-                make download -j32
-                rm 0001-local-key.patch
-                make tools/install -j$(nproc)
-                make toolchain/install -j$(nproc)
-                make -j$(nproc) 'IGNORE_ERRORS=n m'
-                rm -rf build_dir
+                
+                make V=s
                 tar -cvf rockchip-images.tar bin/targets/rockchip/armv8
 
             - name: Upload artifacts
